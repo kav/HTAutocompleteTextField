@@ -51,6 +51,7 @@
 		8DFB04B417FD01F500E7B196 /* HTEmailAutocompleteTextField.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HTEmailAutocompleteTextField.h; sourceTree = "<group>"; };
 		8DFB04B517FD01F500E7B196 /* HTAutocompleteTextField.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HTAutocompleteTextField.m; sourceTree = "<group>"; };
 		8DFB04B617FD01F500E7B196 /* HTAutocompleteTextField.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HTAutocompleteTextField.h; sourceTree = "<group>"; };
+		A7BF46DF198B1879005C0EF5 /* apiKeys.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = apiKeys.h; sourceTree = "<group>"; };
 		C80AC03B16DF7B4100755F19 /* autocompleteButton@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "autocompleteButton@2x.png"; sourceTree = "<group>"; };
 		C80AC03C16DF7B4100755F19 /* autocompleteButton.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = autocompleteButton.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -101,6 +102,7 @@
 		8DF4A80A168B7C610025E16D /* HTTextFieldAutocompletionExample */ = {
 			isa = PBXGroup;
 			children = (
+				A7BF46DF198B1879005C0EF5 /* apiKeys.h */,
 				8DFB04B117FD01AB00E7B196 /* ht-logo-black.png */,
 				C80AC03F16DF7B5D00755F19 /* images */,
 				8DF4A849168B80CD0025E16D /* HTAutocompleteManager.h */,

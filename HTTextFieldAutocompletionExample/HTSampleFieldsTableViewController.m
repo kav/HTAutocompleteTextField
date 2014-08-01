@@ -25,7 +25,7 @@
 
     self.emailTextField.keyboardType = UIKeyboardTypeEmailAddress;
 
-    self.nameTextField.autocompleteType = HTAutocompleteTypeColor;
+    self.nameTextField.autocompleteType = HTAutocompleteTypeAddress;
     
     // Dismiss the keyboard when the user taps outside of a text field
     UITapGestureRecognizer *singleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleSingleTap:)];

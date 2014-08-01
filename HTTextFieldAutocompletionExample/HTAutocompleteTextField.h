@@ -13,10 +13,15 @@
 @class  HTAutocompleteTextField;
 
 @protocol HTAutocompleteDataSource <NSObject>
-
+@optional
 - (NSString*)textField:(HTAutocompleteTextField*)textField
    completionForPrefix:(NSString*)prefix
             ignoreCase:(BOOL)ignoreCase;
+
+- (void)textField:(HTAutocompleteTextField*)textField
+   asyncCompletionForPrefix:(NSString*)prefix
+            ignoreCase:(BOOL)ignoreCase
+            completionHandler:(void (^)(NSString *completion))completionHandler;
 
 @end
 
