@@ -13,7 +13,7 @@ static HTAutocompleteManager *sharedManager;
 
 @interface HTAutocompleteManager ()
 @property (nonatomic, strong) NSURLSessionDataTask *fetchAddressSuggestionTask;
-@property (nonatomic, strong) NSMutableOrderedSet *predictions;
+@property (nonatomic, strong) NSOrderedSet *predictions;
 @end
 
 @implementation HTAutocompleteManager
@@ -82,19 +82,30 @@ static HTAutocompleteManager *sharedManager;
 }
 - (void) addToCache:(NSDictionary *)predictionsDictionary forPrefix:(NSString *)prefix{
     NSArray *addresses = predictionsDictionary[@"predictions"];
+    NSMutableOrderedSet *predictions = self.predictions.mutableCopy;
     for (int i = 0; i < addresses.count; i++) {
+
         NSDictionary *location = addresses[i];
-        [self.predictions addObject:@{@"title":location[@"description"], @"rank":@(prefix.length*10 + i)}];
+        NSArray *locationTypes = location[@"types"];
+        NSArray *matchedSubstrings = location[@"matched_substrings"];
+
+        if(![locationTypes containsObject:@"street_address"]) break;
+        if(![matchedSubstrings containsObject:@{@"length": @(prefix.length), @"offset": @(0)}]) break;
+
+        NSString *title = location[@"description"];
+        title = [title stringByReplacingOccurrencesOfString:@", United States" withString:@""];
+        NSNumber *rank = @(prefix.length*10 + i);
+        [predictions addObject:@{@"title":title, @"rank":rank}];
     }
     NSSortDescriptor *rankSort = [NSSortDescriptor sortDescriptorWithKey:@"rank" ascending:YES];
-    [self.predictions sortUsingDescriptors:@[rankSort]];
+    [predictions sortUsingDescriptors:@[rankSort]];
+    self.predictions = predictions;
 }
 
 - (NSString *)checkLocalForAddress:(NSString *)prefix {
     NSPredicate *predicate = [NSPredicate predicateWithFormat:@"title BEGINSWITH %@", prefix];
-    NSOrderedSet *completions = self.predictions.copy;
 
-    completions = [completions filteredOrderedSetUsingPredicate:predicate];
+    NSOrderedSet *completions = [self.predictions filteredOrderedSetUsingPredicate:predicate];
     if(completions.count > 0 ){
         return completions[0][@"title"];
     }
