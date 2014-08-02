@@ -13,8 +13,7 @@ static HTAutocompleteManager *sharedManager;
 
 @interface HTAutocompleteManager ()
 @property (nonatomic, strong) NSURLSessionDataTask *fetchAddressSuggestionTask;
-@property (nonatomic, strong) NSMutableSet *predictions;
-@property (nonatomic, strong) NSString *locallySavedAddress;
+@property (nonatomic, strong) NSMutableOrderedSet *predictions;
 @end
 
 @implementation HTAutocompleteManager
@@ -30,20 +29,22 @@ static HTAutocompleteManager *sharedManager;
 {
     self = [super init];
     if (self) {
-        _predictions = [NSMutableSet new];
+        _predictions = [[NSMutableOrderedSet alloc] init];
     }
     return self;
 }
 #pragma mark - HTAutocompleteTextFieldDelegate
 - (void)textField:(HTAutocompleteTextField *)textField asyncCompletionForPrefix:(NSString *)prefix ignoreCase:(BOOL)ignoreCase completionHandler:(void (^)(NSString *))completionHandler {
-    
+    if (prefix.length == 0) {
+        return completionHandler(@"");
+    }
+    NSString *locallySavedAddress;
     if ([self.predictions count] > 0) {
-        self.locallySavedAddress = [self checkLocalForAddress:prefix];
+        locallySavedAddress = [self checkLocalForAddress:prefix];
     }
     
-    if (self.locallySavedAddress) {
-        NSString *formattedAddress = [self.locallySavedAddress substringFromIndex:prefix.length];
-        return completionHandler(formattedAddress);
+    if (locallySavedAddress) {
+        return completionHandler(locallySavedAddress);
     } else {
         if (textField.autocompleteType == HTAutocompleteTypeAddress && prefix.length > 3) {
             if(self.fetchAddressSuggestionTask) {
@@ -63,40 +64,40 @@ static HTAutocompleteManager *sharedManager;
                     NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:&jsonError];
                     NSArray *predictions = json[@"predictions"];
                     //NSArray *predictions = [self addressesArray:json];
-                    NSString *address = nil;
+                    NSString *address = @"";
                     if(predictions.count > 0){
                         address = predictions[0][@"description"];
                     }
-                    NSLog(@"%@", address);
-                    address = [address substringFromIndex:prefix.length];
-                    
-                    [self addToCache:json];
+
+                    [self addToCache:json forPrefix:prefix];
                     return completionHandler(address);
                 }
             }];
             [self.fetchAddressSuggestionTask resume];
         }
- 
     }
-    
-    
 }
-
-- (void) addToCache:(NSDictionary *)predictionsDictionary {
-    for (NSDictionary *location in predictionsDictionary[@"predictions"]) {
-        [self.predictions addObject:location[@"description"]];
+-(BOOL)textFieldShouldReplaceCompletionText:(HTAutocompleteTextField *)textField {
+    return YES;
+}
+- (void) addToCache:(NSDictionary *)predictionsDictionary forPrefix:(NSString *)prefix{
+    NSArray *addresses = predictionsDictionary[@"predictions"];
+    for (int i = 0; i < addresses.count; i++) {
+        NSDictionary *location = addresses[i];
+        [self.predictions addObject:@{@"title":location[@"description"], @"rank":@(prefix.length*10 + i)}];
     }
+    NSSortDescriptor *rankSort = [NSSortDescriptor sortDescriptorWithKey:@"rank" ascending:YES];
+    [self.predictions sortUsingDescriptors:@[rankSort]];
 }
 
 - (NSString *)checkLocalForAddress:(NSString *)prefix {
-    for (NSString *address in self.predictions) {
-        NSRange atSignRange = [address rangeOfString:prefix];
-        if (atSignRange.location != NSNotFound)
-        {
-            return address;
-        }
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"title BEGINSWITH %@", prefix];
+    NSOrderedSet *completions = self.predictions.copy;
+
+    completions = [completions filteredOrderedSetUsingPredicate:predicate];
+    if(completions.count > 0 ){
+        return completions[0][@"title"];
     }
-    
     return nil;
 }
 
