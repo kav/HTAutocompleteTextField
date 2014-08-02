@@ -9,7 +9,6 @@
 //
 
 #import <UIKit/UIKit.h>
-
 @class  HTAutocompleteTextField;
 
 @protocol HTAutocompleteDataSource <NSObject>
@@ -22,7 +21,7 @@
    asyncCompletionForPrefix:(NSString*)prefix
             ignoreCase:(BOOL)ignoreCase
             completionHandler:(void (^)(NSString *completion))completionHandler;
-
+- (BOOL)textFieldShouldReplaceCompletionText:(HTAutocompleteTextField*)textField;
 @end
 
 @protocol HTAutocompleteTextFieldDelegate <NSObject>

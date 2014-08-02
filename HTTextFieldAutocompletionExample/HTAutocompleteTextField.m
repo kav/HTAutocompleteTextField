@@ -15,14 +15,12 @@
 static NSObject<HTAutocompleteDataSource> *DefaultAutocompleteDataSource = nil;
 
 @interface HTAutocompleteTextField ()
-
 @property (nonatomic, strong) NSString *autocompleteString;
 @property (nonatomic, strong) UIButton *autocompleteButton;
 
 @end
-
 @implementation HTAutocompleteTextField
-
+@synthesize autocompleteString = _autocompleteString;
 - (instancetype)initWithFrame:(CGRect)frame
 {
     self = [super initWithFrame:frame];
@@ -195,6 +193,24 @@ static NSObject<HTAutocompleteDataSource> *DefaultAutocompleteDataSource = nil;
 		[self.autoCompleteTextFieldDelegate autocompleteTextField:self didChangeAutocompleteText:self.autocompleteString];
 	}
 }
+-(NSString *)autocompleteString {
+
+    id<HTAutocompleteDataSource> datasource;
+    if([self.autocompleteDataSource respondsToSelector:@selector(textFieldShouldReplaceCompletionText:)]) {
+        datasource = self.autocompleteDataSource;
+    } else if([DefaultAutocompleteDataSource respondsToSelector:@selector(textFieldShouldReplaceCompletionText:)]) {
+        datasource = DefaultAutocompleteDataSource;
+    }
+
+    if([datasource textFieldShouldReplaceCompletionText:self]) {
+        if([_autocompleteString rangeOfString:self.text].location == 0){
+            return [_autocompleteString substringFromIndex:self.text.length];
+        } else {
+            return @"";
+        }
+    }
+    return _autocompleteString;
+}
 
 - (void)refreshAutocompleteText
 {
@@ -226,6 +242,7 @@ static NSObject<HTAutocompleteDataSource> *DefaultAutocompleteDataSource = nil;
                 
                 [self updateAutocompleteLabel];
             } else if([dataSource respondsToSelector:@selector(textField:asyncCompletionForPrefix:ignoreCase:completionHandler:)]){
+                [self updateAutocompleteLabel];
                 NSString *asyncText = self.text.copy;
                 [dataSource textField:self asyncCompletionForPrefix:self.text ignoreCase:self.ignoreCase completionHandler:^(NSString *completion) {
                     if([self.text isEqualToString:asyncText]) {
