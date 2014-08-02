@@ -10,3 +10,5 @@
 *.swp
 xcuserdata
 HTTextFieldAutocompletionExample/apiKeys.h
+HTTextFieldAutocompletionExample.xcodeproj/project.xcworkspace/xcshareddata/
+*.xccheckout
