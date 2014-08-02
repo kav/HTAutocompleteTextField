@@ -6,6 +6,7 @@
 //  Copyright (c) 2012 Hotel Tonight. All rights reserved.
 //
 const NSString *kZipCode = @"97115";
+const CGFloat kFetchDelay = 1;
 #import "apiKeys.h"
 #import "HTAutocompleteManager.h"
 
@@ -14,6 +15,7 @@ static HTAutocompleteManager *sharedManager;
 @interface HTAutocompleteManager ()
 @property (nonatomic, strong) NSURLSessionDataTask *fetchAddressSuggestionTask;
 @property (nonatomic, strong) NSOrderedSet *predictions;
+@property (nonatomic, strong) NSTimer *fetchDelayTimer;
 @end
 
 @implementation HTAutocompleteManager
@@ -30,8 +32,17 @@ static HTAutocompleteManager *sharedManager;
     self = [super init];
     if (self) {
         _predictions = [[NSMutableOrderedSet alloc] init];
+        _fetchDelayTimer = [[NSTimer alloc] initWithFireDate:nil interval:0 target:self selector:@selector(fetchData) userInfo:nil repeats:NO];
     }
     return self;
+}
+
+-(void) fetchData{
+    if(self.fetchAddressSuggestionTask.state == NSURLSessionTaskStateSuspended){
+        NSLog(@"Interneting");
+        [self.fetchAddressSuggestionTask resume];
+    }
+    _fetchDelayTimer = [[NSTimer alloc] initWithFireDate:nil interval:0 target:self selector:@selector(fetchData) userInfo:nil repeats:NO];
 }
 #pragma mark - HTAutocompleteTextFieldDelegate
 - (void)textField:(HTAutocompleteTextField *)textField asyncCompletionForPrefix:(NSString *)prefix ignoreCase:(BOOL)ignoreCase completionHandler:(void (^)(NSString *))completionHandler {
@@ -67,13 +78,17 @@ static HTAutocompleteManager *sharedManager;
                     NSString *address = @"";
                     if(predictions.count > 0){
                         address = predictions[0][@"description"];
+                        address = [address stringByReplacingOccurrencesOfString:@", United States" withString:@""];
                     }
 
                     [self addToCache:json forPrefix:prefix];
+
                     return completionHandler(address);
                 }
             }];
-            [self.fetchAddressSuggestionTask resume];
+            
+            [self.fetchDelayTimer setFireDate:[NSDate dateWithTimeIntervalSinceNow:kFetchDelay]];
+            [[NSRunLoop currentRunLoop] addTimer:self.fetchDelayTimer forMode:NSDefaultRunLoopMode];
         }
     }
 }
