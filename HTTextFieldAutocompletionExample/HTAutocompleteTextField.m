@@ -203,7 +203,7 @@ static NSObject<HTAutocompleteDataSource> *DefaultAutocompleteDataSource = nil;
     }
 
     if([datasource textFieldShouldReplaceCompletionText:self]) {
-        if([_autocompleteString rangeOfString:self.text].location == 0){
+        if([_autocompleteString rangeOfString:self.text options:NSCaseInsensitiveSearch].location == 0){
             return [_autocompleteString substringFromIndex:self.text.length];
         } else {
             return @"";
