@@ -28,7 +28,6 @@ const NSInteger kBeginRemoteCompletingAfter = 3;
 }
 -(void) fetchData{
     if(self.fetchAddressSuggestionTask.state == NSURLSessionTaskStateSuspended){
-        NSLog(@"Interneting");
         [self.fetchAddressSuggestionTask resume];
     }
     _fetchDelayTimer = [[NSTimer alloc] initWithFireDate:nil interval:0 target:self selector:@selector(fetchData) userInfo:nil repeats:NO];
@@ -75,7 +74,7 @@ const NSInteger kBeginRemoteCompletingAfter = 3;
                     return completionHandler(address);
                 }
             }];
-
+            self.fetchAddressSuggestionTask.taskDescription = prefix;
             [self.fetchDelayTimer setFireDate:[NSDate dateWithTimeIntervalSinceNow:kFetchDelay]];
             [[NSRunLoop currentRunLoop] addTimer:self.fetchDelayTimer forMode:NSDefaultRunLoopMode];
         }
