@@ -26,7 +26,7 @@
     self.emailTextField.keyboardType = UIKeyboardTypeEmailAddress;
 
     self.nameTextField.autocompleteType = HTAutocompleteTypeAddress;
-    
+    self.nameTextField.placeholder = @"Address";
     // Dismiss the keyboard when the user taps outside of a text field
     UITapGestureRecognizer *singleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleSingleTap:)];
     [self.view addGestureRecognizer:singleTap];
